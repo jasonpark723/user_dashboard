@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link
+      href="/docs/4.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+  </head>
+  <style>
+    body {
+      padding-top: 65px;
+    }
+    .message {
+      margin-top: 70px;
+    }
+  </style>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/">Test App</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarsExampleDefault"
+          aria-controls="navbarsExampleDefault"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/dashboard"
+                >Home <span class="sr-only">(current)</span></a
+              >
+            </li>
+            <a class="nav-link" href="/users/edit/"
+                      >Profile <span class="sr-only">(current)</span></a
+                    >
+                  </li>
+          </ul>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a href="/logout" class="nav-link">logout</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="profile mt-5">
+        <div class="row">
+          <div class="col-5 ml-4">
+            <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+            <table>
+              <tr>
+                <td><strong>Registered at:</strong></td>
+                <td>{{ user.created_at }}</td>
+              </tr>
+              <tr>
+                <td><strong>User ID:</strong></td>
+                <td>#{{ user.id }}</td>
+              </tr>
+              <tr>
+                <td><strong>Email address:</strong></td>
+                <td>{{ user.email }}</td>
+              </tr>
+              <tr>
+                <td><strong>Description</strong></td>
+                <td>{{ user.description }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-6">
+            <img
+              src="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Account-512.png"
+              alt="profile_pic"
+              class="w-25"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="message_post mt-5">
+        <h4 class="d-inline">Leave a message for {{ user.first_name }}</h4>
+        {% if messages %}
+        <ul class="messages text-danger float-right d-inline mb-0">
+          {% for message in messages %} {% if "message" in message.tags %}
+          <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+            {{ message }}
+          </li>
+          {% endif %} {% endfor %}
+        </ul>
+        {% endif %}
+        <form action="/messages/new" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" value="{{ user.id }}" />
+          <div class="form-group mb-1">
+            <textarea
+              class="form-control"
+              name="message"
+              id="message"
+              rows="2"
+            ></textarea>
+          </div>
+          <button type="submit" class="btn btn-outline-warning float-right">
+            Post
+          </button>
+        </form>
+      </div>
+
+      <div class="message">
+        {% for message in user.messages.all %}
+        <p class="mb-0 pb-2">
+          <a href="/users/show/{{ message.author.id }}"
+            >{{ message.author.first_name }} {{ message.author.last_name }}</a
+          >
+          wrote:
+          <span class="float-right">{{ message.created_at }}</span>
+          <a href="/commentdelete"
+            ><button class="btn btn-sm btn-outline-danger float-right mr-3">
+              delete
+            </button></a
+          >
+        </p>
+        <p class="bg-info p-2 rounded mb-1">{{ message.message }}</p>
+        {% for comment in message.comments.all %}
+        <p class="mb-0 w-50 ml-auto">
+          <a href=""
+            >{{ comment.user.first_name }} {{ comment.user.last_name }}</a
+          >
+          wrote:
+          <span class="float-right">{{ comment.created_at }}</span>
+        </p>
+        <p class="bg-warning p-2 rounded w-50 ml-auto mb-1">
+          {{ comment.comment }}
+        </p>
+        {% endfor %}
+
+        <form action="/comments/new" method="post" class="mb-3">
+          {% csrf_token %}
+          <!-- change user id to message id -->
+          <input type="hidden" name="message_id" value="{{ message.id }}" />
+          <input type="hidden" name="user_id" value="{{ message.user.id }}" />
+          <div class="form-group mb-1 w-50 ml-auto">
+            <textarea
+              class="form-control"
+              name="comment"
+              id="comment"
+              rows="2"
+              placeholder="leave a comment"
+            ></textarea>
+          </div>
+          <div class="text-right">
+            <button type="submit" class="btn btn-outline-primary">
+              Post
+            </button>
+          </div>
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+  </body>
+</html>
